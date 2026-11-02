@@ -26,11 +26,10 @@ O framework foi desenhado para mitigar a fadiga de segurança e desencorajar pr�
 
 ## 🚀 Como Rodar o Projeto Localmente
 
-### 1. Pré-requisitos
 Certifique-se de ter o **Python 3** e o **Node.js** instalados na sua máquina.
 Clone este repositório:
 ```bash
-git clone [https://github.com/SeuUsuario/framework-authless.git](https://github.com/SeuUsuario/framework-authless.git)
+git clone [https://github.com/ihncft/framework-authless.git](https://github.com/ihncft/framework-authless.git)
 cd framework-authless
 
 Abra um terminal e configure o ambiente virtual para rodar a API:
