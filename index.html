@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Framework AuthLess</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app" style="font-family: monospace; max-width: 400px; margin: 50px auto;">
+        <h2>Login - Teknisa / FUMEC</h2>
+        
+        <!-- Cenário 1: IP Local -->
+        <div>
+            <label>IP Simulado (Motor de Contexto):</label>
+            <select v-model="currentIp">
+                <option value="192.168.1.100">IP Seguro (Empresa)</option>
+                <option value="203.0.113.5">IP Externo (Desconhecido)</option>
+            </select>
+        </div><br>
+
+        <!-- Formulário Padrão -->
+        <div v-if="!mfaRequired">
+            <input v-model="pin" type="password" placeholder="Digite seu PIN">
+            <button @click="attemptLogin">Acessar</button>
+            <br><br>
+            <button @click="triggerRecovery" style="color: red;">Perdi meu MFA (Recuperação Delegada)</button>
+        </div>
+
+        <!-- Formulário MFA (Aparece só na mudança de contexto) -->
+        <div v-if="mfaRequired">
+            <p>Mudança de rede detectada. Insira o MFA:</p>
+            <input v-model="mfaCode" type="text" placeholder="000000">
+            <button @click="attemptLogin">Validar</button>
+        </div>
+
+        <p style="color: green;">{{ statusMessage }}</p>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+        createApp({
+            setup() {
+                const pin = ref('');
+                const currentIp = ref('192.168.1.100');
+                const mfaRequired = ref(false);
+                const mfaCode = ref('');
+                const statusMessage = ref('');
+
+                const attemptLogin = async () => {
+                    const res = await fetch('http://localhost:8000/login', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            user_id: 'junior',
+                            pin: pin.value,
+                            ip_address: currentIp.value,
+                            mfa_code: mfaCode.value
+                        })
+                    });
+                    const data = await res.json();
+                    
+                    if (data.status === 'mfa_required') {
+                        mfaRequired.value = true;
+                        statusMessage.value = '';
+                    } else if (data.status === 'success') {
+                        statusMessage.value = 'Acesso Liberado!';
+                    } else {
+                        statusMessage.value = 'Erro de acesso.';
+                    }
+                };
+
+                const triggerRecovery = async () => {
+                    // API Call mockada para o fluxo de gestor
+                    statusMessage.value = 'Solicitação enviada ao gestor. Aguardando liberação...';
+                };
+
+                return { pin, currentIp, mfaRequired, mfaCode, statusMessage, attemptLogin, triggerRecovery }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>
